@@ -1,7 +1,11 @@
 # <a href="https://rspamd.com"><img src="https://rspamd.com/img/rspamd_logo_black.png" alt="Rspamd" width="220px"/></a>
 
 [![GHA](https://github.com/rspamd/rspamd/actions/workflows/ci.yml/badge.svg)](https://github.com/rspamd/rspamd/actions/workflows/ci.yml)
+[![Package Rspamd for Debian Sid](https://github.com/bocan/rspamd/actions/workflows/build_debian_sid_package.yml/badge.svg)](https://github.com/bocan/rspamd/actions/workflows/build_debian_sid_package.yml)
 
+## A Note About This Fork
+
+I maintain this fork to build an APT/Debian package for Debian Sid.  The "why" is unimportant because, as with all things Sid, it would only invite children who think they can dictate how and why one should use Linux.  If anyone's remotely interested, I'll make the .deb files public once I build a small repo somewhere.
 
 ## Introduction
 

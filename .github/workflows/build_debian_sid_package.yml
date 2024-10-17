@@ -1,0 +1,45 @@
+name: Package Rspamd for Debian Sid
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup GPG
+        # The cursed private key is too big for a Github Secret.
+        # Getting around that by keeping it encrypted within the repo.
+        run: |
+          gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
+          head -2 debian/SIGNING-KEY
+          gpg --import debian/SIGNING-KEY
+          rm -f debian/SIGNING-KEY*
+          gpg -K
+      - name: Changelog and Version Fix
+        run: |
+          VERS=$(head -1 ChangeLog | cut -f1 -d:)
+          echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
+          echo >> debian/changelog
+          cat ChangeLog| sed -e '/^$/,$d' >> debian/changelog
+          echo >> debian/changelog
+          echo "-- Chris Funderburg <chris@cloudcauldron.io>  $(date)" >> debian/changelog
+          cat debian/changelog
+      - name: Build
+        uses: jtdor/build-deb-action@v1
+        env:
+          DEB_BUILD_OPTIONS: noautodbgsym
+        with:
+          buildpackage-opts: --build=binary --no-sign
+          docker-image: debian:sid
+          extra-build-deps: libluajit-5.1-dev libjemalloc-dev libhyperscan-dev
+      - uses: actions/upload-artifact@v4
+        with:
+          # A file, directory or wildcard pattern that describes what to upload
+          # Required.
+          path: debian/artifacts/*
