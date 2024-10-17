@@ -18,8 +18,8 @@ jobs:
         run: |
           export GPG_TTY=$(tty)
           gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
-          head -2 debian/SIGNING-KEY
-          gpg --import debian/SIGNING-KEY
+          head -3 debian/SIGNING-KEY
+          gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
           rm -f debian/SIGNING-KEY*
           gpg -K
       - name: Changelog and Version Fix
