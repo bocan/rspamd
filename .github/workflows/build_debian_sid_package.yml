@@ -18,9 +18,9 @@ jobs:
         run: |
           export GPG_TTY=$(tty)
           gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
-          head -3 debian/SIGNING-KEY
           gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
           rm -f debian/SIGNING-KEY*
+          echo F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D:6: | gpg --import-ownertrust
           gpg -K
       - name: Changelog and Version Fix
         run: |
