@@ -16,6 +16,7 @@ jobs:
         # The cursed private key is too big for a Github Secret.
         # Getting around that by keeping it encrypted within the repo.
         run: |
+          export GPG_TTY=$(tty)
           gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
           head -2 debian/SIGNING-KEY
           gpg --import debian/SIGNING-KEY
