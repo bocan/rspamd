@@ -28,7 +28,6 @@ jobs:
           VERS=$(head -1 ChangeLog | cut -f1 -d:)
           echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
           echo >> debian/changelog
-          echo -n "  " >> debian/changelog
           tail -n +2 ChangeLog | sed -e '/^$/,$d' >> debian/changelog
           echo >> debian/changelog
           echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
