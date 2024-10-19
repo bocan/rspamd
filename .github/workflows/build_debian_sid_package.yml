@@ -27,7 +27,7 @@ jobs:
           VERS=$(head -1 ChangeLog | cut -f1 -d:)
           echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
           echo >> debian/changelog
-          cat ChangeLog| sed -e '/^$/,$d' >> debian/changelog
+          $(echo -n "  " ; cat ChangeLog) | sed -e '/^$/,$d' >> debian/changelog
           echo >> debian/changelog
           echo "-- Chris Funderburg <chris@cloudcauldron.io>  $(date)" >> debian/changelog
           cat debian/changelog
@@ -37,12 +37,13 @@ jobs:
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
-          buildpackage-opts: --build=binary --no-sign
+          buildpackage-opts: --build=full --sign-key F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D 
           docker-image: debian:sid
           extra-build-deps: libluajit-5.1-dev libjemalloc-dev libhyperscan-dev
       - name: debugging
         run: |
-          find debian
+          pwd
+          ls
       - uses: actions/upload-artifact@v4
         with:
           # A file, directory or wildcard pattern that describes what to upload
