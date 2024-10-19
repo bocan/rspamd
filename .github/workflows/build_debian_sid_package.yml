@@ -24,12 +24,13 @@ jobs:
           gpg -K
       - name: Changelog and Version Fix
         run: |
+          sed -i 's/quilt/native/' debian/source/format
           VERS=$(head -1 ChangeLog | cut -f1 -d:)
           echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
           echo >> debian/changelog
           $(echo -n "  " ; cat ChangeLog) | sed -e '/^$/,$d' >> debian/changelog
           echo >> debian/changelog
-          echo "-- Chris Funderburg <chris@cloudcauldron.io>  $(date)" >> debian/changelog
+          echo " -- Chris Funderburg <chris@funderburg.me>  $(date)" >> debian/changelog
           cat debian/changelog
           ls -l
       - name: Build
