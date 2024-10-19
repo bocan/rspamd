@@ -31,6 +31,7 @@ jobs:
           echo >> debian/changelog
           echo "-- Chris Funderburg <chris@cloudcauldron.io>  $(date)" >> debian/changelog
           cat debian/changelog
+          ls -l
       - name: Build
         uses: jtdor/build-deb-action@v1
         env:
@@ -39,6 +40,9 @@ jobs:
           buildpackage-opts: --build=binary --no-sign
           docker-image: debian:sid
           extra-build-deps: libluajit-5.1-dev libjemalloc-dev libhyperscan-dev
+      - name: debugging
+        run: |
+          find debian
       - uses: actions/upload-artifact@v4
         with:
           # A file, directory or wildcard pattern that describes what to upload
