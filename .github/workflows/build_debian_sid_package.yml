@@ -28,9 +28,10 @@ jobs:
           VERS=$(head -1 ChangeLog | cut -f1 -d:)
           echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
           echo >> debian/changelog
-          $(echo -n "  " ; cat ChangeLog) | sed -e '/^$/,$d' >> debian/changelog
+          echo -n "  " >> debian/changelog
+          cat ChangeLog | sed -e '/^$/,$d' >> debian/changelog
           echo >> debian/changelog
-          echo " -- Chris Funderburg <chris@funderburg.me>  $(date)" >> debian/changelog
+          echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
           cat debian/changelog
           ls -l
       - name: Build
@@ -38,7 +39,7 @@ jobs:
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
-          buildpackage-opts: --build=full --sign-keyid=F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D 
+          buildpackage-opts: --build=full --sign-keyid=chris@funderburg.me
           docker-image: debian:sid
           extra-build-deps: libluajit-5.1-dev libjemalloc-dev libhyperscan-dev
       - name: debugging
