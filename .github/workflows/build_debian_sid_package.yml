@@ -37,7 +37,7 @@ jobs:
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
-          buildpackage-opts: --build=full --sign-key F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D 
+          buildpackage-opts: --build=full --sign-keyid=F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D 
           docker-image: debian:sid
           extra-build-deps: libluajit-5.1-dev libjemalloc-dev libhyperscan-dev
       - name: debugging
