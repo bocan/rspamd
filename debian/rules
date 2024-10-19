@@ -2,7 +2,6 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all reproducible=+fixfilepath
 export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
-export ASAN_OPTIONS=detect_leaks=0
 
 DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 builddir = debian/build/flavor-
@@ -55,7 +54,7 @@ build_%:
 
 override_dh_strip: $(patsubst %,strip_%,$(FLAVORS))
 strip_%:
-	dh_strip -prspamd --dbg-package=rspamd-dbg ; \
+	dh_strip -prspamd ; \
 
 override_dh_makeshlibs:
 	dh_makeshlibs -Xrspamd-actrie
