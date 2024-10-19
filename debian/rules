@@ -1,37 +1,33 @@
 #!/usr/bin/make -f
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all reproducible=+fixfilepath
-DPKG_EXPORT_BUILDFLAGS = 1
-include /usr/share/dpkg/buildflags.mk
-# please blhc
-export ASMFLAGS = $(CPPFLAGS)
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+export ASAN_OPTIONS=detect_leaks=0
 
-include /usr/share/dpkg/architecture.mk
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+builddir = debian/build/flavor-
+FLAVORS = release
+CONFIG_release = -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_LTO=ON
 
-ifneq ($(filter amd64 arm64 armel armhf i386 mips mips64el mipsel ppc64, $(DEB_HOST_ARCH)),)
-  LUAJIT = ON
-else
-  LUAJIT = OFF
-endif
+ENABLE_LUAJIT := -DENABLE_LUAJIT=ON -DLUA_ROOT=/luajit-build
 
-ifneq ($(filter amd64 i386, $(DEB_HOST_ARCH)),)
-  HYPERSCAN=ON
-else
-  HYPERSCAN=OFF
-endif
+# Can be filled by a build system
+EXTRA_ARGS :=
+ENABLE_JEMALLOC := -DENABLE_JEMALLOC=ON
+ENABLE_HYPERSCAN := -DENABLE_HYPERSCAN=ON
 
-ifneq ($(filter amd64 arm64 armel armhf hppa i386 mips64el mipsel powerpcspe ppc64 ppc64el sh4, $(DEB_HOST_ARCH)),)
-  UNWIND=ON
-else
-  UNWIND=OFF
+ifneq ($(filter $(DEB_HOST_ARCH),arm64),)
+	ENABLE_JEMALLOC := -DENABLE_JEMALLOC=OFF
+	ENABLE_HYPERSCAN := -DENABLE_HYPERSCAN=ON -DHYPERSCAN_ROOT_DIR=/vectorscan
 endif
 
 %:
-	dh $@
+	dh $@ --with systemd --parallel
 
-override_dh_auto_configure:
-	dh_auto_configure -- \
-		-DCONFDIR=/etc/rspamd \
+override_dh_auto_configure: $(patsubst %,configure_%,$(FLAVORS))
+configure_%:
+	mkdir -p $(builddir)$*
+	cd $(builddir)$* && cmake ../../../  -DCONFDIR=/etc/rspamd \
 		-DMANDIR=/usr/share/man \
 		-DRUNDIR=/run/rspamd \
 		-DDBDIR=/var/lib/rspamd \
@@ -40,26 +36,37 @@ override_dh_auto_configure:
 		-DLIBDIR=/usr/lib/rspamd \
 		-DINCLUDEDIR=/usr/include \
 		-DSYSTEMDDIR=/lib/systemd/system \
-		-DNO_SHARED=ON \
-		-DDEBIAN_BUILD=1 \
-		-DENABLE_JEMALLOC=ON \
-		-DENABLE_OPTIMIZATION=OFF \
-		-DENABLE_FULL_DEBUG=OFF \
+		-DCMAKE_INSTALL_PREFIX:PATH=/usr \
+		-DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+		-DNO_TARGET_VERSIONS=1 \
 		-DENABLE_PCRE2=ON \
-		-DENABLE_LUAJIT=$(LUAJIT) \
-		-DENABLE_LIBUNWIND=$(UNWIND) \
-		-DENABLE_HYPERSCAN=$(HYPERSCAN) \
+		-DENABLE_LIBUNWIND=ON \
 		-DWANT_SYSTEMD_UNITS=ON \
-		-DENABLE_STATIC_LIBCXX=OFF \
-		-DENABLE_LIBCXX=OFF \
-		-DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
+		-DENABLE_LIBCXX=AUTO \
+		$(ENABLE_HYPERSCAN) \
+		$(ENABLE_LUAJIT) \
+		$(ENABLE_JEMALLOC) \
+		$(CONFIG_$*) \
+		$(EXTRA_ARGS)
+
+override_dh_auto_build: $(patsubst %,build_%,$(FLAVORS))
+build_%:
+	dh_auto_build --sourcedirectory=$(builddir)$*
+
+override_dh_strip: $(patsubst %,strip_%,$(FLAVORS))
+strip_%:
+	dh_strip -prspamd --dbg-package=rspamd-dbg ; \
 
 override_dh_makeshlibs:
-	dh_makeshlibs -Xlibrspamd-actrie -Xlibrspamd-ev -Xlibrspamd-kann -Xlibrspamd-replxx -Xlibrspamd-server
+	dh_makeshlibs -Xrspamd-actrie
 
-override_dh_auto_clean:
-	dh_auto_clean
-	rm -f src/modules.c
+override_dh_auto_install: $(patsubst %,install_%,$(FLAVORS))
+install_%:
+	cd $(builddir)$* && make install DESTDIR=../../../debian/rspamd ; \
+	cd ../../../debian/rspamd &&  mkdir -p var/lib/rspamd \
+	    var/log/rspamd \
+	    etc/rspamd/local.d \
+		etc/rspamd/override.d  ; \
 
 override_dh_fixperms:
 	dh_fixperms
