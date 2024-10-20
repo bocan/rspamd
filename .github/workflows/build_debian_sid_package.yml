@@ -39,8 +39,10 @@ jobs:
         with:
           buildpackage-opts: --build=full --force-sign
           docker-image: debian:sid
-          extra-build-deps: apt-utils devscripts gpg
+          extra-build-deps: apt-utils devscripts
           setup-hook: |
+            apt update
+            apt install gpg -y
             export GPG_TTY=$(tty)
             gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
             gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
