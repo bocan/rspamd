@@ -30,14 +30,14 @@ jobs:
           echo >> debian/changelog
           tail -n +2 ChangeLog | sed -e '/^$/,$d' >> debian/changelog
           echo >> debian/changelog
-          echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
+          echo " -- Chris Funderburg <chris@funderburg.me>  $(date -R)" >> debian/changelog
           cat debian/changelog
       - name: Build
         uses: jtdor/build-deb-action@v1
         env:
           DEB_BUILD_OPTIONS: noautodbgsym
         with:
-          buildpackage-opts: --build=full --sign-keyid=chris@funderburg.me --force-sign
+          buildpackage-opts: --build=full -k chris@funderburg.me --force-sign
           docker-image: debian:sid
           setup-hook: |
             export GNUPGHOME=`pwd`
