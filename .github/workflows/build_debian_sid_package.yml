@@ -44,6 +44,9 @@ jobs:
             GNUPGHOME=`pwd`
             apt update
             apt install gnupg -y
+            pwd
+            ls
+            echo $GNUPGHOME
             gpg -K
       - uses: actions/upload-artifact@v4
         with:
