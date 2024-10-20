@@ -12,27 +12,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup GPG
+      #- name: Setup GPG
         # The cursed private key is too big for a Github Secret.
         # Getting around that by keeping it encrypted within the repo.
-        run: |
-          export GPG_TTY=$(tty)
-          gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
-          gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
-          rm -f debian/SIGNING-KEY*
-          echo F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D:6: | gpg --import-ownertrust
-          gpg -K
-      #- name: Changelog and Version Fix
       #  run: |
-      #    sed -i 's/quilt/native/' debian/source/format
-      #    VERS=$(head -1 ChangeLog | cut -f1 -d:)
-      #    echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
-      #    echo >> debian/changelog
-      #    tail -n +2 ChangeLog | sed -e '/^$/,$d' >> debian/changelog
-      #    echo >> debian/changelog
-      #    echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
-      #    cat debian/changelog
-      #    ls -l
+      #    export GPG_TTY=$(tty)
+      #    gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
+      #    gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
+      #    rm -f debian/SIGNING-KEY*
+      #    echo F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D:6: | gpg --import-ownertrust
+      #    gpg -K
+      - name: Changelog and Version Fix
+        run: |
+          sed -i 's/quilt/native/' debian/source/format
+          VERS=$(head -1 ChangeLog | cut -f1 -d:)
+          echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
+          echo >> debian/changelog
+          tail -n +2 ChangeLog | sed -e '/^$/,$d' >> debian/changelog
+          echo >> debian/changelog
+          echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
+          cat debian/changelog
       - name: Build
         uses: jtdor/build-deb-action@v1
         env:
