@@ -41,7 +41,8 @@ jobs:
           buildpackage-opts: --build=full --sign-keyid=F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D --force-sign --sign-backend=gpg
           docker-image: debian:sid
           setup-hook: |
-            apt install gnupg
+            apt update
+            apt install gnupg -y
             gpg -K
       - uses: actions/upload-artifact@v4
         with:
