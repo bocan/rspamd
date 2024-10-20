@@ -44,6 +44,7 @@ jobs:
             apt update
             apt install gpg -y
             export GPG_TTY=$(tty)
+            export GNUPGHOME=`pwd`
             gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
             gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
             rm -f debian/SIGNING-KEY*
