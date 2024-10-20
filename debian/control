@@ -1,7 +1,7 @@
 Source: rspamd
 Section: mail
 Priority: optional
-Maintainer: Chris Funderburg <chris@funderburg.me>
+Maintainer: Christopher Funderburg <chris@funderburg.me>
 Build-Depends: cmake,
                debhelper (>= 11),
                libarchive-dev,
