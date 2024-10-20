@@ -22,17 +22,17 @@ jobs:
           rm -f debian/SIGNING-KEY*
           echo F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D:6: | gpg --import-ownertrust
           gpg -K
-      - name: Changelog and Version Fix
-        run: |
-          sed -i 's/quilt/native/' debian/source/format
-          VERS=$(head -1 ChangeLog | cut -f1 -d:)
-          echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
-          echo >> debian/changelog
-          tail -n +2 ChangeLog | sed -e '/^$/,$d' >> debian/changelog
-          echo >> debian/changelog
-          echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
-          cat debian/changelog
-          ls -l
+      #- name: Changelog and Version Fix
+      #  run: |
+      #    sed -i 's/quilt/native/' debian/source/format
+      #    VERS=$(head -1 ChangeLog | cut -f1 -d:)
+      #    echo "rspamd ($VERS) unstable; urgency=low" > debian/changelog
+      #    echo >> debian/changelog
+      #    tail -n +2 ChangeLog | sed -e '/^$/,$d' >> debian/changelog
+      #    echo >> debian/changelog
+      #    echo " -- Chris Funderburg <chris@funderburg.me>  $(date +'%a, %d %b %Y %H:%M:%S %z')" >> debian/changelog
+      #    cat debian/changelog
+      #    ls -l
       - name: Build
         uses: jtdor/build-deb-action@v1
         env:
@@ -42,11 +42,13 @@ jobs:
           docker-image: debian:sid
           setup-hook: |
             export GNUPGHOME=`pwd`
+            export GPG_TTY=$(tty)
             apt update
             apt install gnupg -y
-            pwd
-            ls
-            echo $GNUPGHOME
+            gpg --batch --decrypt --passphrase='${{ secrets.GPG_PASSPHRASE }}' --output debian/SIGNING-KEY  debian/SIGNING-KEY.gpg
+            gpg --batch --pinentry-mode loopback --import debian/SIGNING-KEY
+            rm -f debian/SIGNING-KEY*
+            echo F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D:6: | gpg --import-ownertrust
             gpg -K
       - uses: actions/upload-artifact@v4
         with:
