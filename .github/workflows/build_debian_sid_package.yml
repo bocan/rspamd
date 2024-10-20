@@ -40,6 +40,8 @@ jobs:
         with:
           buildpackage-opts: --build=full --sign-keyid=F21F35DB39C2C7D93C9B534C43AD361BAF83FB7D --force-sign --sign-backend=gpg
           docker-image: debian:sid
+          setup-hook: |
+            gpg -K
       - uses: actions/upload-artifact@v4
         with:
           # A file, directory or wildcard pattern that describes what to upload
